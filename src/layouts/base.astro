@@ -1,0 +1,215 @@
+---
+import '../assets/normalize.css'
+import '../assets/style.css'
+import '../assets/global.css'
+import { SEO } from 'astro-seo'
+import { getEnv } from '../lib/env'
+import backToTopIcon from '../assets/back-to-top.svg'
+import { getTranslator } from '../lib/i18n' 
+
+
+// Get locale from  settings then default to locals (set in middleware)
+const locale = getEnv(import.meta.env, Astro, 'LOCALE') ?? Astro.locals.locale;
+
+// Get the translator
+const t = await getTranslator(locale);
+
+const { SITE_URL, RSS_URL, RSS_PREFIX } = Astro.locals
+const { channel } = Astro.props
+
+
+
+const seo = channel?.seo
+const reqPathname = Astro.url.pathname.replace(/\/$/, '')
+const canonical = SITE_URL.startsWith('http') ? new URL(SITE_URL).origin + reqPathname : Astro.url.origin + reqPathname
+
+const { origin, pathname } = new URL(canonical)
+const twitter = getEnv(import.meta.env, Astro, 'TWITTER')
+
+const seoParams = {
+  title: seo?.title,
+  description: seo?.text ?? channel?.description,
+  canonical,
+  noindex: seo?.noindex ?? getEnv(import.meta.env, Astro, 'NOINDEX'),
+  nofollow: seo?.nofollow ?? getEnv(import.meta.env, Astro, 'NOFOLLOW'),
+  openGraph: {
+    basic: {
+      type: 'website',
+      title: channel?.title ?? '',
+      url: canonical,
+      image: channel?.avatar ? channel.avatar : origin + '/favicon.ico',
+    },
+    optional: {
+      description: seo?.text ?? channel?.description,
+      locale,
+    },
+  },
+  extend: {
+    link: [
+      {
+        rel: 'icon',
+        href: channel?.avatar
+          ? `https://wsrv.nl/?w=64&h=64&fit=cover&mask=circle&url=ssl:${channel?.avatar?.replace(/^https?:\/\//, '')}`
+          : '/favicon.svg',
+      },
+    ],
+  },
+}
+
+const GOOGLE_SEARCH_SITE = getEnv(import.meta.env, Astro, 'GOOGLE_SEARCH_SITE')
+const searchAction = GOOGLE_SEARCH_SITE ? 'https://www.google.com/search' : '/search/result'
+
+const HEADER_INJECT = getEnv(import.meta.env, Astro, 'HEADER_INJECT')
+const FOOTER_INJECT = getEnv(import.meta.env, Astro, 'FOOTER_INJECT')
+const TAGS = getEnv(import.meta.env, Astro, 'TAGS')
+const LINKS = getEnv(import.meta.env, Astro, 'LINKS')
+const KEYWORD_EXCLUSION_ENABLED = getEnv(import.meta.env, Astro, 'KEYWORD_EXCLUSION_ENABLED')
+const KEYWORD_INCLUSION_ENABLED = getEnv(import.meta.env, Astro, 'KEYWORD_INCLUSION_ENABLED')
+
+const navs = (getEnv(import.meta.env, Astro, 'NAVS') || '')
+  .split(';')
+  .filter(Boolean)
+  .map((link) => {
+    link = link.split(',')
+    return {
+      title: link[0],
+      href: link[1],
+    }
+  })
+---
+
+<!doctype html>
+<html lang={locale ?? 'en'} 
+data-keyword-exclusion-enabled={KEYWORD_EXCLUSION_ENABLED}
+data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f1ec" />
+
+    <script is:inline>
+      // Apply theme immediately to prevent flash
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme) {
+          document.documentElement.classList.add(theme);
+        }
+      })();
+    </script>
+    
+    <link rel="alternate" type="application/rss+xml" title={`${RSS_PREFIX}${channel?.title}`} href={RSS_URL} />
+    <style is:inline>
+      @view-transition {
+        navigation: auto; /* enabled */
+      }
+    </style>
+    <script src="/src/lib/main.js"></script>
+    <script src="/src/lib/infinite-scroll.js"></script>
+    <SEO
+      titleTemplate={`%s | ${channel?.title}`}
+      titleDefault={[channel?.title, seoParams.description].filter(Boolean).join(' - ')}
+      twitter={{
+        card: 'summary_large_image',
+        creator: twitter ? `@${twitter}` : undefined,
+      }}
+      {...seoParams}
+    />
+    <Fragment set:html={HEADER_INJECT} />
+  </head>
+
+  <body>
+    <div id="wrapper">
+      <div id="container">
+        <div id="main-container">
+          <slot />
+        </div>
+        <div id="aside-container">
+          <slot name="aside">
+            <div class="nav">
+              <div class="nav-item">
+                <a href={SITE_URL} title={channel?.title} class={`nav-link ${pathname === '/' ? 'current' : ''}`}>
+                  {t['nav.home']}
+                </a>
+              </div>
+              {
+                TAGS ? (
+                  <div class="nav-item">
+                    <a
+                      href={`${SITE_URL}tags`}
+                      title="{t['nav.tags']}"
+                      class={`nav-link ${pathname === '/tags' ? 'current' : ''}`}
+                    >
+                      {t['nav.tags']}
+                    </a>
+                  </div>
+                ) : null
+              }
+              {
+                LINKS ? (
+                  <div class="nav-item">
+                    <a
+                      href={`${SITE_URL}links`}
+                      title="{t['nav.links']}"
+                      class={`nav-link ${pathname === '/links' ? 'current' : ''}`}
+                    >
+                      {t['nav.links']}
+                    </a>
+                  </div>
+                ) : null
+              }
+              {
+                navs.map((nav) => (
+                  <div class="nav-item">
+                    <a href={nav.href} title={nav.title} target="_blank" rel="noopener" class="nav-link">
+                      {nav.title}
+                    </a>
+                  </div>
+                ))
+              }
+            </div>
+            <div class="utility-controls">
+              <button id="theme-toggle">
+                <img src="/night-mode.png" alt="Toggle Night Mode" />
+              </button>
+              <input class="search-icon" name="icon" type="checkbox" placeholder="Search" />
+            </div>
+            
+            <form class="search-form" action={searchAction} method="get">
+              {GOOGLE_SEARCH_SITE ? <input type="hidden" name="as_sitesearch" value={GOOGLE_SEARCH_SITE} /> : null}
+              <input type="text" name="q" placeholder={t['sidebar.search.placeholder']} />
+            </form>
+
+            {
+              KEYWORD_EXCLUSION_ENABLED === true || KEYWORD_EXCLUSION_ENABLED === 'true' ? (
+                <div class="keyword-exclusion">
+                  <h4>{t['sidebar.exclude_keywords.title']}</h4>
+                  <input type="text" id="exclude-keywords" placeholder={t['sidebar.exclude_keywords.placeholder']} />
+                  <button id="apply-exclude-filter">{t['sidebar.exclude_keywords.apply_button']}</button>
+                  <button id="clear-exclude-filters">{t['sidebar.exclude_keywords.clear_button']}</button>
+                </div>
+              ) : null
+            }
+
+          {
+            KEYWORD_INCLUSION_ENABLED === true || KEYWORD_INCLUSION_ENABLED === 'true' ? (
+            <div class="keyword-inclusion">
+              <h4>{t['sidebar.include_keywords.title']}</h4>
+              <input type="text" id="include-keywords" placeholder={t['sidebar.include_keywords.placeholder']} />
+              <button id="apply-include-filter">{t['sidebar.include_keywords.apply_button']} </button>
+              <button id="clear-include-filters">{t['sidebar.include_keywords.clear_button']}</button>
+            </div>
+            ) : null
+          }
+          </slot>
+        </div>
+      </div>
+
+    </div>
+    <a href="#wrapper" id="back-to-top" aria-label="Back to top">
+      <img {...backToTopIcon} alt="Back to Top" />
+    </a>
+    <Fragment set:html={FOOTER_INJECT} />
+  </body>
+</html>
+

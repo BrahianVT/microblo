@@ -1,0 +1,17 @@
+{
+  "nav.home": "Inicio",
+  "nav.tags": "Tags",
+  "nav.links": "Enlaces",
+  "sidebar.exclude_keywords.title": "Excluir Palabras",
+  "sidebar.exclude_keywords.placeholder": "Palabras (separado por coma)",
+  "sidebar.search.placeholder": "Buscar",
+  "sidebar.exclude_keywords.apply_button": "Aplicar Filtro",
+  "sidebar.exclude_keywords.clear_button": "Limpiar",
+  "sidebar.include_keywords.title": "Incluir Palabras",
+  "sidebar.include_keywords.placeholder": "Palabras (separado por coma)",
+  "sidebar.include_keywords.apply_button": "Aplicar Filtro",
+  "sidebar.include_keywords.clear_button": "Limpiar",
+  "footer.and": "&",
+  "pagination.before": "Más Antiguos",
+  "pagination.after": "Más Recientes"
+}

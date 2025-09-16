@@ -1,0 +1,17 @@
+{
+  "nav.home": "Home",
+  "nav.tags": "Tags",
+  "nav.links": "Links",
+  "sidebar.exclude_keywords.title": "Exclude Keywords",
+  "sidebar.exclude_keywords.placeholder": "Enter keywords (comma-separated)",
+  "sidebar.search.placeholder": "Search",
+  "sidebar.exclude_keywords.apply_button": "Apply Filter",
+  "sidebar.exclude_keywords.clear_button": "Clear",
+  "sidebar.include_keywords.title": "Include Keywords",
+  "sidebar.include_keywords.placeholder": "Enter keywords (comma-separated)",
+  "sidebar.include_keywords.apply_button": "Apply Filter",
+  "sidebar.include_keywords.clear_button": "Clear",
+  "footer.and": "&",
+  "pagination.before": "Before",
+  "pagination.after": "After"
+}
