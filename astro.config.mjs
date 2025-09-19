@@ -29,52 +29,40 @@ const adapterProvider = process.env.SERVER_ADAPTER || provider
 export default defineConfig({
   output: 'server',
   adapter: providers[adapterProvider] || providers.node,
-  integrations: [
-    pwa({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'Astro PWA',
-        short_name: 'AstroPWA',
-        description: 'Astro PWA example',
-        theme_color: '#ffffff',
-        icons: [
-          {
-            src: '/pwa-192x192.webp',
-            sizes: '192x192',
-            type: 'image/webp',
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/webp',
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/webp',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-    }),
-    ...(process.env.SENTRY_DSN
-      ? [
-          sentry({
-            enabled: {
-              client: false,
-              server: process.env.SENTRY_DSN,
-            },
-            dsn: process.env.SENTRY_DSN,
-            sourceMapsUploadOptions: {
-              enabled: process.env.SENTRY_PROJECT && process.env.SENTRY_AUTH_TOKEN,
-              project: process.env.SENTRY_PROJECT,
-              authToken: process.env.SENTRY_AUTH_TOKEN,
-            },
-          }),
-        ]
-      : []),
+   integrations: [
+   pwa({
+  registerType: 'autoUpdate',
+  manifest: false, // Since you have your own in public/
+  workbox: {
+    globPatterns: ['**/*.{js,css,svg,png,ico,txt,woff2}'],
+    globIgnores: ['**/*.html'],
+    navigateFallback: null,
+    cleanupOutdatedCaches: true,
+    swDest: 'sw.js',
+    runtimeCaching: [
+      {
+        urlPattern: /\//,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'pages',
+          expiration: {
+            maxEntries: 10,
+            maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+          }
+        }
+      }
+    ]
+  },
+ // Ensure the service worker is included in the build
+  includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+  // This ensures sw.js is generated in the output directory
+  outDir: 'dist',
+  devOptions: {
+    enabled: false
+  }
+}),
   ],
-  vite: {
+   vite: {
     ssr: {
       noExternal: process.env.DOCKER ? !!process.env.DOCKER : undefined,
       external: [
