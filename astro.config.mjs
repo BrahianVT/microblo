@@ -38,7 +38,7 @@ export default defineConfig({
         navigateFallback: null,
         cleanupOutdatedCaches: true,
         swDest: 'sw.js',
-        runtimeCaching: [
+        /* runtimeCaching: [
           {
             urlPattern: /\//,
             handler: 'NetworkOnly', // 'NetworkFirst',
@@ -50,7 +50,7 @@ export default defineConfig({
               },
             },
           },
-        ],
+        ], */
       },
       // Ensure the service worker is included in the build
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
