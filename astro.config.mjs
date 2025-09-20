@@ -3,7 +3,6 @@ import cloudflare from '@astrojs/cloudflare'
 import netlify from '@astrojs/netlify'
 import node from '@astrojs/node'
 import vercel from '@astrojs/vercel/serverless'
-import pwa from '@vite-pwa/astro'
 import { defineConfig } from 'astro/config'
 import { provider } from 'std-env'
 
@@ -28,39 +27,7 @@ const adapterProvider = process.env.SERVER_ADAPTER || provider
 export default defineConfig({
   output: 'server',
   adapter: providers[adapterProvider] || providers.node,
-  integrations: [
-    pwa({
-      registerType: 'autoUpdate',
-      manifest: false, // Since you have your own in public/
-      workbox: {
-        globPatterns: ['**/*.{js,css,svg,png,ico,txt,woff2}'],
-        globIgnores: ['**/*.html'],
-        navigateFallback: null,
-        cleanupOutdatedCaches: true,
-        swDest: 'sw.js',
-        /* runtimeCaching: [
-          {
-            urlPattern: /\//,
-            handler: 'NetworkOnly', // 'NetworkFirst',
-            options: {
-              cacheName: 'pages',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
-              },
-            },
-          },
-        ], */
-      },
-      // Ensure the service worker is included in the build
-      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      // This ensures sw.js is generated in the output directory
-      outDir: 'dist',
-      devOptions: {
-        enabled: false,
-      },
-    }),
-  ],
+
   vite: {
     ssr: {
       noExternal: process.env.DOCKER ? !!process.env.DOCKER : undefined,
