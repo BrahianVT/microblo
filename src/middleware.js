@@ -17,8 +17,13 @@ export async function onRequest(context, next) {
     }
 
     if (!response.headers.has('Cache-Control')) {
+      response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    }
+    /*
+    if (!response.headers.has('Cache-Control')) {
       response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300')
     }
+    */
   }
   return response
 };
