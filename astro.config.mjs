@@ -1,12 +1,11 @@
 import process from 'node:process'
-import { defineConfig } from 'astro/config'
-import vercel from '@astrojs/vercel/serverless'
 import cloudflare from '@astrojs/cloudflare'
 import netlify from '@astrojs/netlify'
 import node from '@astrojs/node'
-import { provider } from 'std-env'
-import sentry from '@sentry/astro'
+import vercel from '@astrojs/vercel/serverless'
 import pwa from '@vite-pwa/astro'
+import { defineConfig } from 'astro/config'
+import { provider } from 'std-env'
 
 const providers = {
   vercel: vercel({
@@ -29,40 +28,40 @@ const adapterProvider = process.env.SERVER_ADAPTER || provider
 export default defineConfig({
   output: 'server',
   adapter: providers[adapterProvider] || providers.node,
-   integrations: [
-   pwa({
-  registerType: 'autoUpdate',
-  manifest: false, // Since you have your own in public/
-  workbox: {
-    globPatterns: ['**/*.{js,css,svg,png,ico,txt,woff2}'],
-    globIgnores: ['**/*.html'],
-    navigateFallback: null,
-    cleanupOutdatedCaches: true,
-    swDest: 'sw.js',
-    runtimeCaching: [
-      {
-        urlPattern: /\//,
-        handler: 'NetworkFirst',
-        options: {
-          cacheName: 'pages',
-          expiration: {
-            maxEntries: 10,
-            maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
-          }
-        }
-      }
-    ]
-  },
- // Ensure the service worker is included in the build
-  includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-  // This ensures sw.js is generated in the output directory
-  outDir: 'dist',
-  devOptions: {
-    enabled: false
-  }
-}),
+  integrations: [
+    pwa({
+      registerType: 'autoUpdate',
+      manifest: false, // Since you have your own in public/
+      workbox: {
+        globPatterns: ['**/*.{js,css,svg,png,ico,txt,woff2}'],
+        globIgnores: ['**/*.html'],
+        navigateFallback: null,
+        cleanupOutdatedCaches: true,
+        swDest: 'sw.js',
+        runtimeCaching: [
+          {
+            urlPattern: /\//,
+            handler: 'NetworkOnly', // 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+            },
+          },
+        ],
+      },
+      // Ensure the service worker is included in the build
+      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      // This ensures sw.js is generated in the output directory
+      outDir: 'dist',
+      devOptions: {
+        enabled: false,
+      },
+    }),
   ],
-   vite: {
+  vite: {
     ssr: {
       noExternal: process.env.DOCKER ? !!process.env.DOCKER : undefined,
       external: [
