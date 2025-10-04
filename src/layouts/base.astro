@@ -5,19 +5,16 @@ import '../assets/global.css'
 import { SEO } from 'astro-seo'
 import { getEnv } from '../lib/env'
 import backToTopIcon from '../assets/back-to-top.svg'
-import { getTranslator } from '../lib/i18n' 
-
+import { getTranslator } from '../lib/i18n'
 
 // Get locale from  settings then default to locals (set in middleware)
-const locale = getEnv(import.meta.env, Astro, 'LOCALE') ?? Astro.locals.locale;
+const locale = getEnv(import.meta.env, Astro, 'LOCALE') ?? Astro.locals.locale
 
 // Get the translator
-const t = await getTranslator(locale);
+const t = await getTranslator(locale)
 
 const { SITE_URL, RSS_URL, RSS_PREFIX } = Astro.locals
 const { channel } = Astro.props
-
-
 
 const seo = channel?.seo
 const reqPathname = Astro.url.pathname.replace(/\/$/, '')
@@ -79,26 +76,27 @@ const navs = (getEnv(import.meta.env, Astro, 'NAVS') || '')
 ---
 
 <!doctype html>
-<html lang={locale ?? 'en'} 
-data-keyword-exclusion-enabled={KEYWORD_EXCLUSION_ENABLED}
-data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
+<html
+  lang={locale ?? 'en'}
+  data-keyword-exclusion-enabled={KEYWORD_EXCLUSION_ENABLED}
+  data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
 >
   <head>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4f1ec" />
 
     <script is:inline>
       // Apply theme immediately to prevent flash
-      (function() {
-        const theme = localStorage.getItem('theme');
+      ;(function () {
+        const theme = localStorage.getItem('theme')
         if (theme) {
-          document.documentElement.classList.add(theme);
+          document.documentElement.classList.add(theme)
         }
-      })();
+      })()
     </script>
-    
+
     <link rel="alternate" type="application/rss+xml" title={`${RSS_PREFIX}${channel?.title}`} href={RSS_URL} />
     <style is:inline>
       @view-transition {
@@ -122,6 +120,11 @@ data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
   <body>
     <div id="wrapper">
       <div id="container">
+        <div
+          style="position: fixed; top: 0; right: 0; background: red; color: white; padding: 5px; font-size: 12px; z-index: 9999;"
+        >
+          Built: {new Date().toISOString()}
+        </div>
         <div id="main-container">
           <slot />
         </div>
@@ -175,7 +178,7 @@ data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
               </button>
               <input class="search-icon" name="icon" type="checkbox" placeholder="Search" />
             </div>
-            
+
             <form class="search-form" action={searchAction} method="get">
               {GOOGLE_SEARCH_SITE ? <input type="hidden" name="as_sitesearch" value={GOOGLE_SEARCH_SITE} /> : null}
               <input type="text" name="q" placeholder={t['sidebar.search.placeholder']} />
@@ -192,20 +195,19 @@ data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
               ) : null
             }
 
-          {
-            KEYWORD_INCLUSION_ENABLED === true || KEYWORD_INCLUSION_ENABLED === 'true' ? (
-            <div class="keyword-inclusion">
-              <h4>{t['sidebar.include_keywords.title']}</h4>
-              <input type="text" id="include-keywords" placeholder={t['sidebar.include_keywords.placeholder']} />
-              <button id="apply-include-filter">{t['sidebar.include_keywords.apply_button']} </button>
-              <button id="clear-include-filters">{t['sidebar.include_keywords.clear_button']}</button>
-            </div>
-            ) : null
-          }
+            {
+              KEYWORD_INCLUSION_ENABLED === true || KEYWORD_INCLUSION_ENABLED === 'true' ? (
+                <div class="keyword-inclusion">
+                  <h4>{t['sidebar.include_keywords.title']}</h4>
+                  <input type="text" id="include-keywords" placeholder={t['sidebar.include_keywords.placeholder']} />
+                  <button id="apply-include-filter">{t['sidebar.include_keywords.apply_button']} </button>
+                  <button id="clear-include-filters">{t['sidebar.include_keywords.clear_button']}</button>
+                </div>
+              ) : null
+            }
           </slot>
         </div>
       </div>
-
     </div>
     <a href="#wrapper" id="back-to-top" aria-label="Back to top">
       <img {...backToTopIcon} alt="Back to Top" />
@@ -213,4 +215,3 @@ data-keyword-inclusion-enabled={KEYWORD_INCLUSION_ENABLED}
     <Fragment set:html={FOOTER_INJECT} />
   </body>
 </html>
-

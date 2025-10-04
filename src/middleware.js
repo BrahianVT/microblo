@@ -16,14 +16,24 @@ export async function onRequest(context, next) {
       response.headers.set('Speculation-Rules', '"/rules/prefetch.json"')
     }
 
-    if (!response.headers.has('Cache-Control')) {
+    // Override any existing cache headers for dynamic content
+    if (context.url.pathname === '/'
+      || context.url.pathname.startsWith('/posts')
+      || context.url.pathname.startsWith('/search')
+      || context.url.pathname.startsWith('/tags')) {
+      // Cloudflare-specific cache control headers
       response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+      response.headers.set('Pragma', 'no-cache')
+      response.headers.set('Expires', '0')
+
+      // Additional Cloudflare headers
+      response.headers.set('X-Cloudflare-CDN-Cache-Control', 'no-cache')
+      response.headers.set('X-Cloudflare-Edge-Cache-Control', 'no-cache')
     }
-    /*
-    if (!response.headers.has('Cache-Control')) {
+    else {
+      // Allow caching for static assets and RSS
       response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300')
     }
-    */
   }
   return response
 };

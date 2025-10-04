@@ -29,6 +29,13 @@ export default defineConfig({
   adapter: providers[adapterProvider] || providers.node,
 
   vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
+      },
+    },
     ssr: {
       noExternal: process.env.DOCKER ? !!process.env.DOCKER : undefined,
       external: [
